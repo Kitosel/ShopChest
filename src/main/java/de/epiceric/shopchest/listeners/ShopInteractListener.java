@@ -71,10 +71,10 @@ public class ShopInteractListener implements Listener {
     private static final Pattern COLOR_CODE_PATTERN = Pattern.compile(".*([§]([a-fA-F0-9]))");
     private static final Pattern FORMAT_CODE_PATTERN = Pattern.compile(".*([§]([l-oL-OkK]))");
 
-    private ShopChest plugin;
-    private Economy econ;
-    private Database database;
-    private ShopUtils shopUtils;
+    private final ShopChest plugin;
+    private final Economy econ;
+    private final Database database;
+    private final ShopUtils shopUtils;
 
     public ShopInteractListener(ShopChest plugin) {
         this.plugin = plugin;
@@ -1069,7 +1069,7 @@ public class ShopInteractListener implements Listener {
     /**
      * Adds items to an inventory
      * @param inventory The inventory, to which the items will be added
-     * @param itemStack Items to add
+     * @param product Items to add
      * @return Whether all items were added to the inventory
      */
     private boolean addToInventory(Inventory inventory, ShopProduct product) {
@@ -1128,7 +1128,7 @@ public class ShopInteractListener implements Listener {
     /**
      * Removes items to from an inventory
      * @param inventory The inventory, from which the items will be removed
-     * @param itemStack Items to remove
+     * @param product Items to remove
      * @return Whether all items were removed from the inventory
      */
     private boolean removeFromInventory(Inventory inventory, ShopProduct product) {

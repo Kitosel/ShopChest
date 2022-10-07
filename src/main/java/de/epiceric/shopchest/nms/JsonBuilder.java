@@ -118,9 +118,9 @@ public class JsonBuilder {
     private ShopChest plugin;
 
     private final NMSClassResolver nmsClassResolver = new NMSClassResolver();
-    private Class<?> iChatBaseComponentClass = nmsClassResolver.resolveSilent("network.chat.IChatBaseComponent");
-    private Class<?> packetPlayOutChatClass = nmsClassResolver.resolveSilent("network.protocol.game.PacketPlayOutChat");
-    private Class<?> chatSerializerClass = nmsClassResolver.resolveSilent("ChatSerializer", "network.chat.IChatBaseComponent$ChatSerializer");
+    private final Class<?> iChatBaseComponentClass = nmsClassResolver.resolveSilent("network.chat.IChatBaseComponent");
+    private final Class<?> packetPlayOutChatClass = nmsClassResolver.resolveSilent("network.protocol.game.PacketPlayOutChat");
+    private final Class<?> chatSerializerClass = nmsClassResolver.resolveSilent("ChatSerializer", "network.chat.IChatBaseComponent$ChatSerializer");
     private Class<?> chatMessageTypeClass;
 
     public JsonBuilder(ShopChest plugin) {

@@ -372,6 +372,45 @@ public class Utils {
                 a.invoke(dataWatcher, 2, customName != null ? customName : ""); // custom name
                 a.invoke(dataWatcher, 4, (byte) 1); // silent
                 a.invoke(dataWatcher, 10, nmsItemStack == null ? armorStandFlags : nmsItemStack); // item / armor stand flags
+            } else if(majorVersion >= 18) {
+                Method register = dataWatcherClass.getMethod("a", dataWatcherObjectClass, Object.class);
+                String[] dataWatcherObjectFieldNames = new String[] {"Z", "aL", "aN", "aM", "aO", "aP", "c", "bG"};
+
+                Field fEntityFlags = entityClass.getDeclaredField(dataWatcherObjectFieldNames[0]);
+                Field fAirTicks = entityClass.getDeclaredField(dataWatcherObjectFieldNames[1]);
+                Field fNameVisible = entityClass.getDeclaredField(dataWatcherObjectFieldNames[2]);
+                Field fCustomName = entityClass.getDeclaredField(dataWatcherObjectFieldNames[3]);
+                Field fSilent = entityClass.getDeclaredField(dataWatcherObjectFieldNames[4]);
+                Field fNoGravity = entityClass.getDeclaredField(dataWatcherObjectFieldNames[5]);
+                Field fItem = entityItemClass.getDeclaredField(dataWatcherObjectFieldNames[6]);
+                Field fArmorStandFlags = entityArmorStandClass.getDeclaredField(dataWatcherObjectFieldNames[7]);
+
+                fEntityFlags.setAccessible(true);
+                fAirTicks.setAccessible(true);
+                fNameVisible.setAccessible(true);
+                fCustomName.setAccessible(true);
+                fSilent.setAccessible(true);
+                fNoGravity.setAccessible(true);
+                fItem.setAccessible(true);
+                fArmorStandFlags.setAccessible(true);
+                register.invoke(dataWatcher, fEntityFlags.get(null), entityFlags);
+                register.invoke(dataWatcher, fAirTicks.get(null), 300);
+                register.invoke(dataWatcher, fNameVisible.get(null), customName != null);
+                register.invoke(dataWatcher, fSilent.get(null), true);
+
+                if (nmsItemStack != null) {
+                    register.invoke(dataWatcher, fItem.get(null), nmsItemStack);
+                } else {
+                    register.invoke(dataWatcher, fArmorStandFlags.get(null), armorStandFlags);
+                }
+                register.invoke(dataWatcher, fNoGravity.get(null), true);
+                if (customName != null) {
+                    Object iChatBaseComponent = chatSerializerClass.getMethod("a", String.class).invoke(null, JsonBuilder.parse(customName).toString());
+                    register.invoke(dataWatcher, fCustomName.get(null), Optional.of(iChatBaseComponent));
+                } else {
+                    register.invoke(dataWatcher, fCustomName.get(null), Optional.empty());
+                }
+                return dataWatcher;
             } else {
                 Method register = dataWatcherClass.getMethod("register", dataWatcherObjectClass, Object.class);
                 String[] dataWatcherObjectFieldNames;
@@ -460,7 +499,12 @@ public class Utils {
      */
     public static int getFreeEntityId() {
         try {
-            Field entityCountField = new FieldResolver(entityClass).resolve("entityCount", "b");
+            Field entityCountField;
+            if(getMajorVersion() < 18) {
+                entityCountField = new FieldResolver(entityClass).resolve("entityCount", "b");
+            } else {
+                entityCountField = new FieldResolver(entityClass).resolve("c");
+            }
             entityCountField.setAccessible(true);
             if (entityCountField.getType() == int.class) {
                 int id = entityCountField.getInt(null);
@@ -469,7 +513,6 @@ public class Utils {
             } else if (entityCountField.getType() == AtomicInteger.class) {
                 return ((AtomicInteger) entityCountField.get(null)).incrementAndGet();
             }
-
             return -1;
         } catch (Exception e) {
             return -1;
@@ -495,7 +538,7 @@ public class Utils {
                 y += 1.975;
             }
 
-            if (getMajorVersion() >= 17) {
+            if (getMajorVersion() >= 17 && getMajorVersion() <= 18) {
                 // Empty packet constructor does not exist anymore in 1.17+
                 Constructor<?> c = packetPlayOutSpawnEntityClass.getConstructor(int.class, UUID.class, double.class, double.class, double.class,
                         float.class, float.class, entityTypesClass, int.class, vec3dClass);
@@ -504,6 +547,13 @@ public class Utils {
                 Object entityType = entityTypesClass.getField(type == EntityType.ARMOR_STAND ? "c" : "Q").get(null);
 
                 return c.newInstance(id, uuid, loc.getX(), y, loc.getZ(), 0f, 0f, entityType, 0, vec3d);
+            }
+            if(getMajorVersion() >= 19) {
+                net.minecraft.world.entity.EntityTypes<?> typ =
+                        (type == EntityType.ARMOR_STAND ? net.minecraft.world.entity.EntityTypes.d : net.minecraft.world.entity.EntityTypes.T);
+
+                return new net.minecraft.network.protocol.game.PacketPlayOutSpawnEntity(
+                        id, uuid, loc.getX(), y, loc.getZ(), 0f, 0f, typ, 0, new net.minecraft.world.phys.Vec3D(0D, 0D, 0D), 0);
             }
             
             Object packet = packetPlayOutSpawnEntityClass.getConstructor().newInstance();
@@ -573,7 +623,6 @@ public class Utils {
                 plugin.debug("Failed to send packet: Packet is null");
                 return false;
             }
-
             Class<?> packetClass = nmsClassResolver.resolveSilent("network.protocol.Packet");
             if (packetClass == null) {
                 plugin.debug("Failed to send packet: Could not find Packet class");
@@ -584,8 +633,11 @@ public class Utils {
             Field fConnection = (new FieldResolver(nmsPlayer.getClass())).resolve("playerConnection", "b");
             Object playerConnection = fConnection.get(nmsPlayer);
 
-            playerConnection.getClass().getMethod("sendPacket", packetClass).invoke(playerConnection, packet);
-
+            if(getMajorVersion() < 18) {
+                playerConnection.getClass().getMethod("sendPacket", packetClass).invoke(playerConnection, packet);
+            } else {
+                playerConnection.getClass().getMethod("a", packetClass).invoke(playerConnection, packet);
+            }
             return true;
         } catch (NoSuchMethodException | NoSuchFieldException | IllegalAccessException | InvocationTargetException e) {
             plugin.getLogger().severe("Failed to send packet " + packet.getClass().getName());
@@ -645,5 +697,7 @@ public class Utils {
         return config.getItemStack("i", null);
     }
 
-
+    public static String tl(String translate) {
+        return org.bukkit.ChatColor.translateAlternateColorCodes('&', translate);
+    }
 }

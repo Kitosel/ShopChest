@@ -41,11 +41,12 @@ import de.epiceric.shopchest.utils.Permissions;
 import de.epiceric.shopchest.utils.ShopUtils;
 import de.epiceric.shopchest.utils.UpdateChecker;
 import de.epiceric.shopchest.utils.Utils;
+import org.jetbrains.annotations.NotNull;
 
 class ShopCommandExecutor implements CommandExecutor {
 
-    private ShopChest plugin;
-    private ShopUtils shopUtils;
+    private final ShopChest plugin;
+    private final ShopUtils shopUtils;
 
     ShopCommandExecutor(ShopChest plugin) {
         this.plugin = plugin;
@@ -53,7 +54,7 @@ class ShopCommandExecutor implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, String[] args) {
         List<ShopSubCommand> subCommands = plugin.getShopCommand().getSubCommands();
 
         if (args.length > 0) {
@@ -79,7 +80,8 @@ class ShopCommandExecutor implements CommandExecutor {
                 }
             } else if (subCommand.getName().equalsIgnoreCase("update")) {
                 if (sender.hasPermission(Permissions.UPDATE)) {
-                    checkUpdates(sender);
+                    sender.sendMessage(Utils.tl("&cThis plugin version is remade for 1.18+ and the update doesn't work here"));
+                    //checkUpdates(sender);
                 } else {
                     sender.sendMessage(LanguageUtils.getMessage(Message.NO_PERMISSION_UPDATE));
                 }
@@ -330,7 +332,7 @@ class ShopCommandExecutor implements CommandExecutor {
     }
 
     /**
-     * <b>SHALL ONLY BE CALLED VIA {@link ShopCommand#createShopAfterSelected()}</b>
+     * <b>SHALL ONLY BE CALLED VIA {@link ShopCommand# createShopAfterSelected()}</b>
      */
     protected void create2(Player p, SelectClickType selectClickType) {
         ItemStack itemStack = selectClickType.getItem();

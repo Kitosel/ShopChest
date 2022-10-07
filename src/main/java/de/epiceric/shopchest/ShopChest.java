@@ -213,7 +213,7 @@ public class ShopChest extends JavaPlugin {
         loadExternalPlugins();
         loadMetrics();
         initDatabase();
-        checkForUpdates();
+        //checkForUpdates();
         registerListeners();
         registerExternalListeners();
         initializeShops();

@@ -68,7 +68,7 @@ public class TownyListener implements Listener {
             }
 
             Resident resident = playerResident.get();
-            String plotType = townBlock.getType().name();
+            String plotType = townBlock.getType().toString();
             boolean cancel = (resident.isMayor() && !Config.townyShopPlotsMayor.contains(plotType))
                     || (resident.isKing() && !Config.townyShopPlotsKing.contains(plotType))
                     || (!resident.isKing() && !resident.isMayor() && !Config.townyShopPlotsResidents.contains(plotType));

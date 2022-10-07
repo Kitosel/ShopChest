@@ -3,7 +3,7 @@
 name: ${project.name}
 main: de.epiceric.shopchest.ShopChest
 version: ${project.version}
-author: EpicEric
+author: [ EpicEric, Kiosel ]
 website: ${project.url}
 description: Create your own nice-looking chest shops and sell your stuff to other players!
 softdepend: [WorldGuard, Towny, AuthMe, PlotSquared, uSkyBlock, ASkyBlock, IslandWorld, GriefPrevention, AreaShop, Multiverse-Core, MultiWorld, BentoBox]
